@@ -5,7 +5,7 @@ def begin():
     return cv2.VideoCapture(0)
 
 
-def process_stream(cap, process_frame_callback):
+def process_stream(cap, process_frame_callback=lambda x:x):
     while True:
         ret, frame = cap.read()  # Чтение текущего кадра
         if not ret:  # Проверка на успешное чтение кадра
