@@ -9,7 +9,7 @@ config = {
     "second": {
         "file": "files/2.png",
         "imread_flag": cv2.IMREAD_COLOR,
-        "window_flag": cv2.WARP_INVERSE_MAP
+        "window_flag": cv2.WINDOW_AUTOSIZE
     },
     "third": {
         "file": "files/2.webp",
