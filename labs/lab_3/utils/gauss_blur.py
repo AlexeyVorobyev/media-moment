@@ -24,7 +24,7 @@ def conv_operation(
     half_size = int(kernel_size // 2)
     for k in range(-half_size, half_size + 1):
         for l in range(-half_size, half_size + 1):
-            value += image[item_y + k, item_x + l] + kernel[k + half_size, l + half_size]
+            value += image[item_y + k, item_x + l] * kernel[k + half_size, l + half_size]
 
     return value
 
@@ -44,7 +44,7 @@ def gauss_blur(
         :return: Обработанное изображение
         """
 
-    if kernel_size % 2 == 1:
+    if kernel_size % 2 == 0:
         raise Exception('Kernel size must be odd.')
 
     kernel = nm.normalize_matrix(
@@ -55,11 +55,11 @@ def gauss_blur(
     h, w = image.shape[:2]
     half_kernel_size = int(kernel_size // 2)
 
-    for y in range(half_kernel_size, h - half_kernel_size):  # Проход по матрице вертикально
-        for x in range(half_kernel_size, w - half_kernel_size):  # Проход по матрице горизонтально
+    for x in range(half_kernel_size, w - half_kernel_size):  # Проход по матрице горизонтально
+        for y in range(half_kernel_size, h - half_kernel_size):  # Проход по матрице вертикально
             # Операция свёртки
-            blurred_val = conv_operation(x,y,blurred_image, kernel, kernel_size)
+            blurred_val = conv_operation(x,y,image, kernel, kernel_size)
 
             blurred_image[y, x] = blurred_val
 
-    return image
+    return blurred_image

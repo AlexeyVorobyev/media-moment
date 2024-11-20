@@ -126,7 +126,7 @@ def gauss_blur(
         :return: Обработанное изображение
         """
 
-    if kernel_size % 2 == 1:
+    if kernel_size % 2 == 0:
         raise Exception('Kernel size must be odd.')
 
     kernel = nm.normalize_matrix(
@@ -144,5 +144,18 @@ def gauss_blur(
 
             blurred_image[y, x] = blurred_val
 
-    return image
+    return blurred_image
 ```
+
+4. Испробовал блюр на различных параметрах:
+
+```python
+blur_params = {
+    "KER: 5, DEV: 0.5": (5, 0.5),
+    "KER: 9, DEV: 0.5": (9, 0.5),
+    "KER: 5, DEV: 1": (5, 1),
+    "KER: 9, DEV: 1": (9, 1),
+}
+```
+
+![image](images/5.png)
