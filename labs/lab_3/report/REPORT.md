@@ -159,3 +159,18 @@ blur_params = {
 ```
 
 ![image](images/5.png)
+
+5. Испробовал блюр и сравнил с гауссом
+
+```python
+blur_params = {
+    "KER: 5, DEV: 1": (5, 1),
+    "KER: 9, DEV: 2": (9, 2),
+}
+```
+
+![image](images/6.png)
+
+6. Имплементировал алгоритм с использованием Go
+
+![image](images/7.png)
