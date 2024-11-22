@@ -204,4 +204,70 @@ class SobelOperator(MatrixOperator):
 
 На изображении были подавлены пиксели, которые не являются локальными максимуми, инымми словами были выделены граница объектов 
 
+ГРАНИЦЕЙ БУДЕТ СЧИТАТЬСЯ ПИКСЕЛЬ, ГРАДИЕНТ КОТОРОГО
+МАКСИМАЛЕН В СРАВНЕНИИ С ПИКСЕЛЯМИ ПО НАПРАВЛЕНИЮ
+НАИБОЛЬШЕГО РОСТА ФУНКЦИИ
+
 ![image](images/4.png)
+
+4. Проведу двойную пороговую фильтрацию
+
+Суть метода:
+
+```python
+max_gradient = np.max(grads_len)
+print(max_gradient)
+lower_bound = max_gradient / self._threshold_dividers[0]
+upper_bound = max_gradient / self._threshold_dividers[1]
+```
+
+- Ставим MAX и MIN границы значенния градиента
+- Фильтруем границы. Если > MAX, то точно граница Если < MIN то точно не граница, дале рассматриваем < MAX и > MIN
+
+Те значения что внутри диапазона мы проверяем пограничные пиксели, если хотя бы 1 - граница то и этот граница.
+
+```python
+    def __double_threshold_filter(
+            self,
+            img: np.ndarray,
+            img_with_borders: np.ndarray,
+            grads_len: np.ndarray,
+    ):
+        """
+        Выполнить двойную пороговую фильтрацию
+        :param img: Изображение
+        :param img_with_borders: Изображение с уже отмеченными границами
+        :param grads_len: Матрица длин градиентов
+        :return:
+        """
+        max_gradient = np.max(grads_len)
+        print(max_gradient)
+        lower_bound = max_gradient / self._threshold_dividers[0]
+        upper_bound = max_gradient / self._threshold_dividers[1]
+        print(f'Нижняя граница {lower_bound}, Верхняя: {upper_bound}')
+        filtered_img = np.zeros(img.shape)
+
+        for i in range(0, img.shape[0]):
+            for j in range(0, img.shape[1]):
+                gradient = grads_len[i][j]
+                if img_with_borders[i][j] == 255:
+                    # Если выше верхней границы, то точно входит
+                    if gradient > upper_bound:
+                        filtered_img[i][j] = 255
+                    elif lower_bound <= gradient <= upper_bound:  # Если между двумя границами - нужно проверить соседей
+                        has_neigh_border = False
+                        for k in range(-1, 2):
+                            for l in range(-1, 2):
+                                if (
+                                        img_with_borders[i + k][j + l] == 255
+                                        and img_with_borders[i + k][j + l] >= upper_bound
+                                ):
+                                    has_neigh_border = True
+                        if has_neigh_border:
+                            img_with_borders[i][j] = 255
+        return filtered_img
+```
+
+## Результаты:
+
+![image](images/5.png)

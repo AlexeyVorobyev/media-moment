@@ -14,6 +14,7 @@ class ImageShowKaniAlgorythmEnum(enum.Enum):
     GRAD_LENGTH = 2
     GRAD_ANGLE = 3
     SUPPRESSED = 4
+    FILTERED = 5
 
 class KaniAlgorythm:
 
@@ -22,13 +23,15 @@ class KaniAlgorythm:
     _kernel_size: int
     _image_show_list: list[ImageShowKaniAlgorythmEnum]
     _matrix_operator: MatrixOperator
+    _threshold_dividers: (int, int)
 
     def __init__(
             self,
             image_size: (int, int) = (500, 500),
             deviation: float = 1,
             kernel_size: int = 5,
-            image_show_list=None
+            image_show_list: list[ImageShowKaniAlgorythmEnum] =None,
+            threshold_dividers: (int, int) = (5, 5)
     ):
         """
         Инициализация класса
@@ -49,6 +52,7 @@ class KaniAlgorythm:
         self._deviation = deviation
         self._kernel_size = kernel_size
         self._matrix_operator = SobelOperator()
+        self._threshold_dividers = threshold_dividers
 
     def __preprocess_image(self, path_to_image: str) -> np.ndarray:
         """
@@ -205,6 +209,46 @@ class KaniAlgorythm:
         else:
             return -9999999, -9999999
 
+    def __double_threshold_filter(
+            self,
+            img: np.ndarray,
+            img_with_borders: np.ndarray,
+            grads_len: np.ndarray,
+    ):
+        """
+        Выполнить двойную пороговую фильтрацию
+        :param img: Изображение
+        :param img_with_borders: Изображение с уже отмеченными границами
+        :param grads_len: Матрица длин градиентов
+        :return:
+        """
+        max_gradient = np.max(grads_len)
+        print(max_gradient)
+        lower_bound = max_gradient / self._threshold_dividers[0]
+        upper_bound = max_gradient / self._threshold_dividers[1]
+        print(f'Нижняя граница {lower_bound}, Верхняя: {upper_bound}')
+        filtered_img = np.zeros(img.shape)
+
+        for i in range(0, img.shape[0]):
+            for j in range(0, img.shape[1]):
+                gradient = grads_len[i][j]
+                if img_with_borders[i][j] == 255:
+                    # Если выше верхней границы, то точно входит
+                    if gradient > upper_bound:
+                        filtered_img[i][j] = 255
+                    elif lower_bound <= gradient <= upper_bound:  # Если между двумя границами - нужно проверить соседей
+                        has_neigh_border = False
+                        for k in range(-1, 2):
+                            for l in range(-1, 2):
+                                if (
+                                        img_with_borders[i + k][j + l] == 255
+                                        and img_with_borders[i + k][j + l] >= upper_bound
+                                ):
+                                    has_neigh_border = True
+                        if has_neigh_border:
+                            img_with_borders[i][j] = 255
+        return filtered_img
+
     def process_image(
             self,
             image_path: str
@@ -236,6 +280,15 @@ class KaniAlgorythm:
 
         if ImageShowKaniAlgorythmEnum.SUPPRESSED in self._image_show_list:
             cv2.imshow("Suppressed", suppressed_img)
+
+        result_img = self.__double_threshold_filter(
+            img,
+            suppressed_img,
+            grads_lengths
+        )
+
+        if ImageShowKaniAlgorythmEnum.FILTERED in self._image_show_list:
+            cv2.imshow("Filtered", result_img)
 
         cv2.waitKey(0)
         cv2.destroyAllWindows()
