@@ -289,3 +289,6 @@ upper_bound = max_gradient / self._threshold_dividers[1]
 Размытие - 0.001
 
 ![image](images/9.png)
+
+5. Реализована программа на языке c++
+
