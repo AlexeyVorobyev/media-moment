@@ -13,6 +13,7 @@ class ImageShowKaniAlgorythmEnum(enum.Enum):
     GAUSSIAN = 1
     GRAD_LENGTH = 2
     GRAD_ANGLE = 3
+    SUPPRESSED = 4
 
 class KaniAlgorythm:
 
@@ -162,6 +163,48 @@ class KaniAlgorythm:
             corner_x += 1
         return corners
 
+    def __not_max_suppress(self, grads_len: np.ndarray, corners: np.ndarray) -> np.ndarray:
+        """
+        Подавление немаксимумов
+        :param grads_len: Матрица длин градиентов
+        :param corners: Матрица углов градиентов
+        :return:
+        """
+        height, width = grads_len.shape
+        bordered_image = np.zeros_like(grads_len)
+
+        for y in range(1, height - 1):
+            for x in range(1, width - 1):
+                angle = int(corners[x][y])
+                first_neigh, second_neigh = self.__get_grad_neighbors_by_angle(grads_len, x, y, angle)
+
+                if grads_len[x][y] > first_neigh and grads_len[x][y] > second_neigh:
+                    bordered_image[x][y] = 255
+                else:
+                    bordered_image[x][y] = 0
+
+        return bordered_image
+
+    def __get_grad_neighbors_by_angle(self, grads_len: np.ndarray, x: int, y: int, angle: int) -> tuple:
+        """
+        Получить длины градиентов двух соседних пикселей
+        :param grads_len:
+        :param x:
+        :param y:
+        :param angle:
+        :return:
+        """
+        if angle == 0 or angle == 4:
+            return grads_len[x + 1][y], grads_len[x - 1][y]
+        elif angle == 1 or angle == 5:
+            return grads_len[x - 1][y + 1], grads_len[x + 1][y - 1]
+        elif angle == 2 or angle == 6:
+            return grads_len[x][y + 1], grads_len[x][y - 1]
+        elif angle == 3 or angle == 7:
+            return grads_len[x + 1][y + 1], grads_len[x - 1][y - 1]
+        else:
+            return -9999999, -9999999
+
     def process_image(
             self,
             image_path: str
@@ -188,6 +231,11 @@ class KaniAlgorythm:
             cv2.imshow("Grad angles", cv2.resize(corners, self._image_size))
             print('Матрица значений углов градиентов:')
             print(corners)
+
+        suppressed_img = self.__not_max_suppress(grads_lengths, corners)
+
+        if ImageShowKaniAlgorythmEnum.SUPPRESSED in self._image_show_list:
+            cv2.imshow("Suppressed", suppressed_img)
 
         cv2.waitKey(0)
         cv2.destroyAllWindows()

@@ -107,6 +107,8 @@ class SobelOperator(MatrixOperator):
         return corners
 ```
 
+![image](images/3.png)
+
 Вычисляем угол на основе градиента:
 ```python
     def __get_corner_by_grad(self, grad: tuple) -> int:
@@ -147,3 +149,59 @@ class SobelOperator(MatrixOperator):
 
 ![image](images/2.png)
 
+3. Модифицировал метод так, чтобы он выполнял подавление
+немаксимумов и выводил полученное изображение на экран.
+
+Подавляем немаксимумы
+
+```python
+    def __not_max_suppress(self, grads_len: np.ndarray, corners: np.ndarray) -> np.ndarray:
+        """
+        Подавление немаксимумов
+        :param grads_len: Матрица длин градиентов
+        :param corners: Матрица углов градиентов
+        :return:
+        """
+        height, width = grads_len.shape
+        bordered_image = np.zeros_like(grads_len)
+
+        for y in range(1, height - 1):
+            for x in range(1, width - 1):
+                angle = int(corners[x][y])
+                first_neigh, second_neigh = self.__get_grad_neighbors_by_angle(grads_len, x, y, angle)
+
+                if grads_len[x][y] > first_neigh and grads_len[x][y] > second_neigh:
+                    bordered_image[x][y] = 255
+                else:
+                    bordered_image[x][y] = 0
+
+        return bordered_image
+```
+
+Получаем длину градиентов двух соседних пикселей
+
+```python
+    def __get_grad_neighbors_by_angle(self, grads_len: np.ndarray, x: int, y: int, angle: int) -> tuple:
+        """
+        Получить длины градиентов двух соседних пикселей
+        :param grads_len:
+        :param x:
+        :param y:
+        :param angle:
+        :return:
+        """
+        if angle == 0 or angle == 4:
+            return grads_len[x + 1][y], grads_len[x - 1][y]
+        elif angle == 1 or angle == 5:
+            return grads_len[x - 1][y + 1], grads_len[x + 1][y - 1]
+        elif angle == 2 or angle == 6:
+            return grads_len[x][y + 1], grads_len[x][y - 1]
+        elif angle == 3 or angle == 7:
+            return grads_len[x + 1][y + 1], grads_len[x - 1][y - 1]
+        else:
+            return -9999999, -9999999
+```
+
+На изображении были подавлены пиксели, которые не являются локальными максимуми, инымми словами были выделены граница объектов 
+
+![image](images/4.png)
