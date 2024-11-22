@@ -66,7 +66,7 @@ class KaniAlgorythm:
         if ImageShowKaniAlgorythmEnum.GRAYSCALE in self._image_show_list:
             cv2.imshow("GrayScale", img)
 
-        img = cv2.GaussianBlur(img, (self._kernel_size, self._kernel_size), self._deviation)
+        img = cv2.GaussianBlur(img, (self._kernel_size, self._kernel_size), sigmaX=self._deviation, sigmaY=self._deviation)
 
         if ImageShowKaniAlgorythmEnum.GAUSSIAN in self._image_show_list:
             cv2.imshow("Gaussian", img)
@@ -292,3 +292,48 @@ class KaniAlgorythm:
 
         cv2.waitKey(0)
         cv2.destroyAllWindows()
+
+    def process_image_with_return(
+            self,
+            image_path: str
+    ):
+        """
+        Провести обработку алгоритмом Канни
+        :param image_path:
+        :return:
+        """
+        img = self.__preprocess_image(image_path)
+
+        gradients = self.__get_gradients(img, self._matrix_operator.x_matrix, self._matrix_operator.y_matrix)
+
+        grads_lengths = self.__get_grad_length(img, grads=gradients)
+
+        if ImageShowKaniAlgorythmEnum.GRAD_LENGTH in self._image_show_list:
+            cv2.imshow("Grad lengths", cv2.resize(grads_lengths, self._image_size))
+            print('Матрица значений длин градиентов:')
+            print(grads_lengths)
+
+        corners = self.__get_corners(img, gradients)
+
+        if ImageShowKaniAlgorythmEnum.GRAD_ANGLE in self._image_show_list:
+            cv2.imshow("Grad angles", cv2.resize(corners, self._image_size))
+            print('Матрица значений углов градиентов:')
+            print(corners)
+
+        suppressed_img = self.__not_max_suppress(grads_lengths, corners)
+
+        if ImageShowKaniAlgorythmEnum.SUPPRESSED in self._image_show_list:
+            cv2.imshow("Suppressed", suppressed_img)
+
+        max_gradient = np.max(grads_lengths)
+        print(max_gradient)
+        lower_bound = max_gradient / self._threshold_dividers[0]
+        upper_bound = max_gradient / self._threshold_dividers[1]
+
+        result_img = self.__double_threshold_filter(
+            img,
+            suppressed_img,
+            grads_lengths
+        )
+
+        return result_img, (lower_bound, upper_bound)

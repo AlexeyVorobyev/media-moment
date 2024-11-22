@@ -271,3 +271,21 @@ upper_bound = max_gradient / self._threshold_dividers[1]
 ## Результаты:
 
 ![image](images/5.png)
+
+### Провёл опыты для различных параметров размытия и пороговых значений
+
+Размытие - 1.5
+
+![image](images/6.png)
+
+Размытие - 3
+
+![image](images/7.png)
+
+Размытие - 10
+
+![image](images/8.png)
+
+Размытие - 0.001
+
+![image](images/9.png)
