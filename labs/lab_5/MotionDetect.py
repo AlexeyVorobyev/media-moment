@@ -109,5 +109,56 @@ class MotionDetect:
         cv2.destroyAllWindows()
 
 if __name__ == '__main__':
-    motionDetect = MotionDetect()
-    motionDetect.process_video('files/2.mp4', 'files/2_proc.mp4')
+
+    logging.basicConfig(level=logging.INFO)
+
+    configs = [
+        {
+            "threshold": 40,
+            "contour_area": 200,
+            "deviation": 2,
+        },
+        {
+            "threshold": 100,
+            "contour_area": 20,
+            "deviation": 2,
+        },
+        {
+            "threshold": 10,
+            "contour_area": 500,
+            "deviation": 1,
+        },
+        {
+            "threshold": 10,
+            "contour_area": 5000,
+            "deviation": 1,
+        },
+        {
+            "threshold": 10,
+            "contour_area": 3000,
+            "deviation": 1,
+        },
+        {
+            "threshold": 10,
+            "contour_area": 2000,
+            "deviation": 1,
+        },
+        {
+            "threshold": 5,
+            "contour_area": 2000,
+            "deviation": 1,
+        },
+        {
+            "threshold": 1,
+            "contour_area": 2000,
+            "deviation": 1,
+        },
+    ]
+
+    for i, config in enumerate(configs):
+        motionDetect = MotionDetect(
+            threshold=config["threshold"],
+            contour_area=config["contour_area"],
+            deviation=config["deviation"],
+        )
+        motionDetect.process_video('files/2.mp4', f'files/2_proc_{i}.mp4')

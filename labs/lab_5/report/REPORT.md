@@ -168,3 +168,16 @@ area = cv2.contourArea(contour)
         logging.info("Видео успешно записано")
         cv2.destroyAllWindows()
 ```
+
+2. Провёл эксперименты с видео
+
+2_proc_6.mp4
+
+Лучшие настройки:
+```python
+{
+    "threshold": 5,
+    "contour_area": 2000,
+    "deviation": 1,
+},
+```

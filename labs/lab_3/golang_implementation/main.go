@@ -100,11 +100,23 @@ func main() {
 		log.Fatalf("Failed to decode image: %v", err)
 	}
 
+bounds := img.Bounds()
+    grayImg := image.NewGray(bounds)
+
+	for y := bounds.Min.Y; y < bounds.Max.Y; y++ {
+		for x := bounds.Min.X; x < bounds.Max.X; x++ {
+			c := img.At(x, y)
+
+			grayColor := color.GrayModel.Convert(c).(color.Gray)
+			grayImg.Set(x, y, grayColor)
+		}
+	}
+
 	// Создание ядра Гаусса
 	kernel := createGaussianKernel(5, 2.0)
 
 	// Применение Гауссового размытия
-	blurred := applyConvolution(img, kernel)
+	blurred := applyConvolution(grayImg, kernel)
 
 	// Сохранение результата
 	outputFile, err := os.Create("files/2.jpg")
