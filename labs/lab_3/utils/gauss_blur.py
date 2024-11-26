@@ -1,4 +1,5 @@
 import numpy as np
+import cv2
 
 from . import conv_matrix as convm, normalize_matrix as nm
 
@@ -52,14 +53,23 @@ def gauss_blur(
     )
 
     blurred_image = image.copy()
+
+    kernel_shift = kernel_size // 2
+
+    bordered_image_with_borders = cv2.copyMakeBorder(
+        blurred_image, kernel_shift, kernel_shift, kernel_shift, kernel_shift,
+        cv2.BORDER_CONSTANT,
+        value=[0, 0, 0]
+    )
+
     h, w = image.shape[:2]
     half_kernel_size = int(kernel_size // 2)
 
     for x in range(half_kernel_size, w - half_kernel_size):  # Проход по матрице горизонтально
         for y in range(half_kernel_size, h - half_kernel_size):  # Проход по матрице вертикально
             # Операция свёртки
-            blurred_val = conv_operation(x,y,image, kernel, kernel_size)
+            blurred_val = conv_operation(x, y, image, kernel, kernel_size)
 
-            blurred_image[y, x] = blurred_val
+            bordered_image_with_borders[y, x] = blurred_val
 
-    return blurred_image
+    return bordered_image_with_borders

@@ -31,49 +31,33 @@ kaniAlgo.process_image('files/1.jpg')
     - Вычисляляю и вывожу на экран две матрицы – матрица значений длин и матрица значений углов градиентов всех пикселей изображения.
 
 Для нахождения градиента изображения используется оператор собеля
+
+![image](images/10.png)
+
+
+Собственная реализация Оператора собеля:
 ```python
 class SobelOperator(MatrixOperator):
 
     def x_matrix(self, img, x, y):
-        """
-        Применение оператора Собеля для нахождения Gx
-        Матрица выглядит следующим образом:
-        -1 0 1
-        -2 0 2
-        -1 0 1
-        :param img: Исходное изображение
-        :param x: Координата пикселя по X
-        :param y: Координата пикселя по Y
-        :return:
-        """
         return -int(img[x - 1][y - 1]) - 2 * int(img[x][y - 1]) - int(img[x + 1][y - 1]) + \
             int(img[x - 1][y + 1]) + 2 * int(img[x][y + 1]) + int(img[x + 1][y + 1])
 
     def y_matrix(self, img, x, y):
-        """
-        Применение оператора Собеля для нахождения Gy
-        Матрица выглядит следующим образом:
-        -1 -2 -1
-        0 0 0
-        1 2 1
-        :param img: Исходное изображение
-        :param x: Координата пикселя по X
-        :param y: Координата пикселя по Y
-        :return:
-        """
         return -int(img[x - 1][y - 1]) - 2 * int(img[x - 1][y]) - int(img[x - 1][y + 1]) + \
             int(img[x + 1][y - 1]) + 2 * int(img[x + 1][y]) + int(img[x + 1][y + 1])
 ```
+Как высчитывать градиент для матрицы:
+
+![img.png](images/11.png)
+
+Градиент - это частичные производные по x и y, если рассматривать матрицу изобрежения как функцию от двух параметров
+
+![img.png](img.png)
 
 Затем получаем матрицу длин градиентов:
 ```python
     def __get_grad_length(self, img: np.ndarray, grads: list[list[tuple]]) -> np.ndarray:
-        """
-        Получить матрицу длин градиентов
-        :param img:
-        :param grads:
-        :return:
-        """
         grads_length = np.zeros((img.shape[0], img.shape[1]))
         grad_x_coord = 0
         for x in range(1, img.shape[0] - 1):
@@ -86,15 +70,14 @@ class SobelOperator(MatrixOperator):
         return grads_length
 ```
 
+формула просчёта угла градиента:
+
+![img.png](images/12.png)
+
 Затем получаем матрицу углов градиентов:
+
 ```python
     def __get_corners(self, img: np.ndarray, grads: list[list[tuple]]) -> np.ndarray:
-        """
-        Получить матрицу углов градиентов
-        :param img:
-        :param grads:
-        :return:
-        """
         corners = np.zeros((img.shape[0], img.shape[1]))
         grads_len = len(grads[0])
         corner_x = 1
@@ -112,11 +95,6 @@ class SobelOperator(MatrixOperator):
 Вычисляем угол на основе градиента:
 ```python
     def __get_corner_by_grad(self, grad: tuple) -> int:
-        """
-        Получить округлённое значение угла по его градиенту
-        :param grad:
-        :return:
-        """
         Gx, Gy = grad
         tang = Gy / Gx if Gx != 0 else 999
         if Gx > 0 > Gy and tang < -2.414 or Gx < 0 and Gy < 0 and tang > 2.414:
@@ -154,14 +132,16 @@ class SobelOperator(MatrixOperator):
 
 Подавляем немаксимумы
 
+> границей будет считаться пиксель, градиент которого
+максимален в сравнении с пикселями по направлению
+наибольшего роста функции. в нашем примере, направление задано
+числом 6, то есть направление вдоль оси x, рассматриваем значение градиента 
+в пикселях слева и справа от заданного. если значение градиента
+выше, чем у пикселей слева и справа, то данный пиксель –
+это граница, иначе – не граница.
+
 ```python
     def __not_max_suppress(self, grads_len: np.ndarray, corners: np.ndarray) -> np.ndarray:
-        """
-        Подавление немаксимумов
-        :param grads_len: Матрица длин градиентов
-        :param corners: Матрица углов градиентов
-        :return:
-        """
         height, width = grads_len.shape
         bordered_image = np.zeros_like(grads_len)
 
@@ -178,18 +158,10 @@ class SobelOperator(MatrixOperator):
         return bordered_image
 ```
 
-Получаем длину градиентов двух соседних пикселей
+Получаем длину градиентов двух соседних пикселей исходя из направления градиента
 
 ```python
     def __get_grad_neighbors_by_angle(self, grads_len: np.ndarray, x: int, y: int, angle: int) -> tuple:
-        """
-        Получить длины градиентов двух соседних пикселей
-        :param grads_len:
-        :param x:
-        :param y:
-        :param angle:
-        :return:
-        """
         if angle == 0 or angle == 4:
             return grads_len[x + 1][y], grads_len[x - 1][y]
         elif angle == 1 or angle == 5:
