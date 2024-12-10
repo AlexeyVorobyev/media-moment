@@ -21,6 +21,7 @@
 ```python
 diff = cv2.absdiff(src1, src2)
 ```
+input_path
 
 <hr/>
 
@@ -100,74 +101,6 @@ area = cv2.contourArea(contour)
 9. Находим внешние контуры с помощью cv2.findContours
 10. Затем для каждого контура вычисляем площадь, с помощью cv2.contourArea, и если оно больше чем заданное значение то фрейм - с движением
 11. Повторить со следующей парой n + 1 и n + 2
-
-```python
-    def process_video(
-            self,
-            input_path: str,
-            output_path: str
-    ):
-        video_ifstream = cv2.VideoCapture(input_path)
-        
-        ret, frame = video_ifstream.read()
-
-        if not ret:
-            logging.error('Не удалось открыть видеофайл.')
-            return
-
-        # Читаем первый кадр в чб, применяем размытие Гаусса
-        processed_frame = self.__prepare_frame(frame)
-
-        # Подготовка файла для записи нового видео
-        fourcc = cv2.VideoWriter_fourcc(*'mp4v')
-        frame_width = int(video_ifstream.get(cv2.CAP_PROP_FRAME_WIDTH))
-        frame_height = int(video_ifstream.get(cv2.CAP_PROP_FRAME_HEIGHT))
-
-        video_ofstream = cv2.VideoWriter(output_path, fourcc, 24, (frame_width, frame_height))
-
-        logging.info(f"Видео будет сохранено по адресу: {output_path}")
-
-        while True:
-            previous_frame = processed_frame.copy()
-
-            ret, frame = video_ifstream.read()
-
-            if not ret:
-                break
-
-            # Преобразование текущего кадра в оттенки серого и размытие
-            processed_frame = self.__prepare_frame(frame)
-
-            # Вычисление разницы между текущим и предыдущим кадром
-            frame_difference = cv2.absdiff(previous_frame, processed_frame)
-
-            # Проводим операцию двоичного разделения:
-            # проводим бинаризацию изображения по пороговому значению (оставляем либо 255, либо 0)
-            _, thresholded_frame = cv2.threshold(frame_difference, self._threshold, 255, cv2.THRESH_BINARY)
-
-            # Поиск контуров объектов
-            contours, _ = cv2.findContours(thresholded_frame, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
-
-            for contour in contours:
-
-                contour_area = cv2.contourArea(contour)
-
-                if contour_area < self._contour_area: # Ищем контур больше заданного значения
-                    continue
-
-                # Запись исходного кадра, если найдены значимые изменения
-                video_ofstream.write(frame)
-                break
-
-            # Прерывание по нажатию клавиши 'Esc'
-            if cv2.waitKey(1) & 0xFF == 27:
-                break
-
-        video_ifstream.release()
-        video_ofstream.release()
-        logging.info("Видео успешно записано")
-        cv2.destroyAllWindows()
-```
 
 2. Провёл эксперименты с видео
 

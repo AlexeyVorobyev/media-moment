@@ -1,0 +1,17 @@
+set shell := ["bash", "-c"]
+
+init:
+    python3 -m venv venv && \
+    source ./venv/bin/activate && \
+    pip install poetry && \
+    poetry install
+
+source:
+    source ./venv/bin/activate
+
+run:
+    source ./venv/bin/activate && \
+    python3 MotionDetect.py
+
+run-video target:
+    xdg-open ./files/{{target}}
