@@ -9,7 +9,7 @@ from keras.api.utils import to_categorical
 from utils.timer import Timer
 
 batch_size = 128
-num_epochs = 50
+num_epochs = 500
 hidden_size = 512
 
 num_train_samples = 60000
