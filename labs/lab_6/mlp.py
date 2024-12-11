@@ -8,15 +8,21 @@ from keras.api.utils import to_categorical
 
 from utils.timer import Timer
 
+# Размер батча
 batch_size = 128
+# количество эпох
 num_epochs = 500
+# количество нейронов в скрытом слое
 hidden_size = 512
 
 num_train_samples = 60000
 num_test_samples = 10000
 
+# высота в пикселях
 height = 28
+# ширина в пикселях
 width = 28
+# Количество каналов (в нашем случае 1, т.к черно-белое)
 depth = 1
 num_classes = 10
 
