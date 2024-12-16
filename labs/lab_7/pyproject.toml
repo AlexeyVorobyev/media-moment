@@ -12,6 +12,7 @@ keras = "^3.7.0"
 tensorflow = "^2.18.0"
 fuzzywuzzy = "^0.18.0"
 pytesseract = "^0.3.13"
+easyocr = "^1.7.2"
 
 
 [build-system]
