@@ -1,4 +1,4 @@
-from BaseValType import BaseValType
+from .BaseValType import BaseValType
 from fuzzywuzzy import fuzz
 
 
