@@ -1,7 +1,7 @@
 import cv2
 import numpy as np
 
-from text_recognition.dataset_preparing.images_crop import get_image_filenames
+from labs.lab_7.utils.dataset.get_image_filenames import get_image_filenames
 
 
 def preprocess_image(img: np.ndarray) -> np.ndarray:
@@ -21,9 +21,9 @@ def preprocess_image(img: np.ndarray) -> np.ndarray:
     return blurred
 
 if __name__ == '__main__':
-    images_names = get_image_filenames('../dataset/cropped')
+    images_names = get_image_filenames('../dataset/raw')
     for image_name in images_names:
-        image = cv2.imread('../dataset/cropped/' + image_name)
+        image = cv2.imread('../dataset/raw/' + image_name)
         # cv2.imshow('image', image)
         edges = preprocess_image(image)
-        cv2.imwrite('../dataset/preprocessed/' + image_name, edges)
+        cv2.imwrite('../dataset/processed/' + image_name, edges)

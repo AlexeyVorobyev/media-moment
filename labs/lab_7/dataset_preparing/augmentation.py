@@ -28,10 +28,10 @@ def augment_image(image_path: str, folder_to_save: str):
 
 if __name__ == '__main__':
 
-    dataset_raw_path = "../dataset/raw"
+    dataset_raw_path = "../dataset/processed"
 
     for image in get_image_filenames(dataset_raw_path):
         augment_image(
             f"{dataset_raw_path}/{image}",
-            folder_to_save='../dataset/augmented'
+            folder_to_save='../dataset/augmented_processed'
         )
