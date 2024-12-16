@@ -14,5 +14,6 @@ model_executor = ModelExecutor(
 if __name__ == '__main__':
     model_executor.execute(
         input_data_folder_path="./dataset/raw",
-        output_folder_path="./results"
+        output_folder_path="./results",
+        postfix="raw"
     )

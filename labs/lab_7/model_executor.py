@@ -2,8 +2,8 @@ import csv
 
 import cv2
 
+from utils.dataset.clear_from_extension_and_rotated import clear_from_extension_and_rotated
 from model.BaseModel import BaseModel
-from utils.dataset.clear_from_chars import clear_from_extension
 from utils.dataset.get_image_filenames import get_image_filenames
 from val_type.BaseValType import BaseValType
 
@@ -24,7 +24,8 @@ class ModelExecutor:
     def execute(
             self,
             input_data_folder_path: str,
-            output_folder_path: str
+            output_folder_path: str,
+            postfix: str = "result"
     ):
 
         answers: list[dict[str, str]] = []
@@ -36,7 +37,7 @@ class ModelExecutor:
 
             answer = {
                 "predict": text_from_model,
-                "correct": clear_from_extension(img_filename),
+                "correct": clear_from_extension_and_rotated(img_filename),
             }
 
             for val_type in self.__val_types:
@@ -49,7 +50,7 @@ class ModelExecutor:
 
         val_types_mark = ".".join([val_type.__class__.__name__ for val_type in self.__val_types])
 
-        output_file_path = f"{output_folder_path}/{self.__model.__class__.__name__}.{val_types_mark}.csv"
+        output_file_path = f"{output_folder_path}/{self.__model.__class__.__name__}.{val_types_mark}.{postfix}.csv"
 
         if len(answers) == 0:
             return
